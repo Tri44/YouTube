@@ -1,0 +1,70 @@
+//This is my some code my Receive in Service
+
+public class StatesReceiver extends Service implements NetworkStateReceiver.NetworkStateReceiverListener {
+
+    public NetworkStateReceiver NetworkStateReceiver;
+    @Override
+    public IBinder onBind(Intent intent){
+        return null;
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        final IntentFilter state = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+        state.addAction(Intent.ACTION_POWER_CONNECTED);
+        state.addAction(Intent.ACTION_POWER_DISCONNECTED);
+        super.registerReceiver(StateReceiver, state);
+        
+    }
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId){
+        Log.w("StatesReceiver", "ReceiverStarted");
+        return START_STICKY;
+    }   
+    
+    @Override
+    public void onDestroy(){
+        super.onDestroy();
+        Log.w("StatesReceiver", "ReceiverDestroy");
+        super.unregisterReceiver(StateReceiver);
+    }
+
+private BroadcastReceiver StateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String intentAction = intent.getAction();
+            
+            if (intentAction != null) {
+                switch (intentAction) {
+                    //CHARGING
+                    case Intent.ACTION_POWER_CONNECTED:
+                        Charging(null);
+                        break;
+                    //DISCHARGING
+                    case Intent.ACTION_POWER_DISCONNECTED:
+                        Discharging(null);
+                        break;
+                }
+            }
+        }
+    };
+
+//Here is the Custom Toast when screen touch by user custom toast is stop or dismiss
+even it set to toast.setDuration(Toast.LENGTH_LONG);
+
+public void Charging(ViewGroup v){
+        Log.w("CustomToast", "Charging");
+        LayoutInflater inflater = (LayoutInflater) getSystemService(LAYOUT_INFLATER_SERVICE);
+        View layout = inflater.inflate(R.layout.activity_toast, v);
+        GifImageView toastImg = layout.findViewById(R.id.toast);
+        toastImg.setImageResource(R.drawable.alert_charging);
+        Toast toast = new Toast(getApplicationContext());
+        toast.setGravity(Gravity.TOP, 0, -10);
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setView(layout);
+        toast.show();
+    }
+}
+   
